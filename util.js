@@ -1,4 +1,12 @@
 let util = {
+	/**
+	 * 
+	 * @param {Array} array 源数组 
+	 * @param {Number} size 拆分后每个数组的长度 
+	 * @returns {Array} 返回新数组
+	 * 将 array 拆分成长度为 size 的数组，纯函数
+	 * 
+	 */
 	chunk: function(array, size = 1) {
 		size = Math.max(size,0);
 		let length = array == null ? 0 : array.length;
@@ -11,5 +19,21 @@ let util = {
 			result[i] = array.slice(size*i,size*i+size);
 		}
 		return result;
+	},
+	/**
+	 * 
+	 * @param {Array} 
+	 * @returns {Array} 
+	 * 删除 array 中的false, null, 0, "", undefined, NaN，纯函数
+	 * 
+	 */
+	compact: function(array) {
+		if(!Array.isArray(array)){
+			return [];
+		}
+		// 或 filter
+		return array.filter(item => {
+			return item;
+		});
 	}
 };

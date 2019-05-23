@@ -35,5 +35,14 @@ let util = {
 		return array.filter(item => {
 			return item;
 		});
+	},
+	/**
+	 * 
+	 * @param  {...any} 传入的参数包括 2,[3],[[4]] 
+	 * @returns {Array} 新数组
+	 * 
+	 */
+	concat: function(...arg) {
+		return [].concat(...arg);
 	}
 };

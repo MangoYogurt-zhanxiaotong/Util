@@ -293,5 +293,239 @@ let util = {
 			obj[array[i][0]] = array[i][1];
 		}
 		return obj;
+	},
+	/**
+	 * 
+	 * @param  {...any} arg 
+	 * @returns {Array} res
+	 * 数组交集
+	 */
+	intersection: function(...arg){
+		var res = [];
+		var flag = 0;
+		for(var i = 0; i < arg[0].length; i++){
+			flag = 0;
+			for(var j = 1; j < arg.length; j++){
+				for(var k = 0; k < arg[j].length; k++){
+					if(arg[0][i] == arg[j][k]){
+						flag++;
+						break;
+					}
+				}
+				if(flag == arg.length - 1){
+					res.push(arg[0][i]);
+				}
+			}
+		}
+		return res;
+	},
+	/**
+	 * 
+	 * @param  {...any} arg 
+	 * @returns {Array} res
+	 * 经过迭代函数计算后的数组交集
+	 */
+	intersectionBy: function(...arg){
+		var fn, res = [], flag = 0;
+		var res = [];
+		var flag = 0;
+		var f = arg.pop();
+		if(typeof f == 'string'){
+			fn = function(obj){
+				return obj[f];
+			}
+		}else if (typeof f == 'function'){
+			fn = f;
+		}
+		for(var i = 0; i < arg[0].length; i++){
+			flag = 0;
+			for(var j = 1; j < arg.length; j++){
+				for(var k = 0; k < arg[j].length; k++){
+					if(fn(arg[0][i]) == fn(arg[j][k])){
+						flag++;
+						break;
+					}
+				}
+				if(flag == arg.length - 1){
+					res.push(arg[0][i]);
+				}
+			}
+		}
+		return res;
+	},
+	/**
+	 * 
+	 * @param {Array} array 待检查的数组
+	 * @param  {...any} arg 移除的参数
+	 * 从array中移除所有给定数值
+	 */
+	pull: function(array, ...arg){
+		for(var i = 0; i < array.length; i++){
+			if(arg.indexOf(array[i]) > -1){
+				array.splice(i, 1);
+				i--;
+			}
+		}
+	},
+	/**
+	 * 
+	 * @param {Array} array 
+	 * @param {Array} values 
+	 * @param {*} f 
+	 * 删除数组中的与value值经过迭代后相等的项
+	 */
+	pullAllBy: function(array, values, f){
+		var fn ;
+		if(typeof f == 'string'){
+			fn = function(obj) {
+				return obj[f];
+			}
+		}
+		if(typeof f == 'function'){
+			fn = f;
+		}
+		for(var i = 0; i < array.length; i++){
+			for(var j = 0; j < values.length; j++){
+				if(fn(values[j]) == fn(array[i])){
+					array.splice(i, 1);
+					i--;
+					break;
+				}
+			}
+		}
+	},
+	/**
+	 * 
+	 * @param {Array} array 
+	 * @param {Array} values 
+	 * @param {Function} comparator 比较函数
+	 */
+	pullAllWith: function(array, values, comparator){
+		return array.filter(item => {
+			for(var i = 0; i < values.length; i++){
+				if(comparator(item, values[i])){
+					return false;
+				}
+			}
+			return true;
+		});
+	},
+	/**
+	 * 
+	 * @param {Array} array 
+	 * @param {Array} index 移除的索引数组
+	 * @returns {Array} 返回被移除的元素
+	 * 从array中移除index数组中所包含的索引对应的元素
+	 */
+	pullAt: function(array, index){
+		var res = [];
+		var newArr = [];
+		for(var i = 0; i < array.length; i++){
+			if(index.indexOf(i) > -1){
+				res.push(array[i]);
+			} else {
+				newArr.push(array[i]);
+			}
+		}
+		array.length = [];
+		Array.prototype.push.apply(array, newArr);
+		return res;
+	},
+	/**
+	 * 
+	 * @param {Array} array 待检索的数组
+	 * @param {Number} value 待比较的值
+	 * @returns {Number} high 下标
+	 * 在 array 中搜索 value 应插入的位置以保证数组的有序
+	 */
+	sortedIndex: function(array, value){
+		var low = 0;
+		var high = array.length - 1;
+		while(low < high){
+			var mid = Math.floor((low + high) / 2);
+			var midValue = array[mid];
+			if(midValue < value){
+				low = mid + 1;
+			} else {
+				high = mid;
+			}
+		}
+		return high;
+	},
+	/**
+	 * 
+	 * @param {Array} array 待检索的数组
+	 * @param {Number} value 待比较的值
+	 * @param {*} f 迭代函数
+	 * @returns {Number} high 下标
+	 */
+	sortedIndexBy: function(array, value, f){
+		var fn, low = 0, high = array.length - 1;
+		if(typeof f == 'string'){
+			fn = function(obj){
+				return obj[f];
+			}
+		} else if (typeof f == 'function'){
+			fn = f;
+		}
+		while(low < high){
+			var mid = Math.floor((low + high) / 2);
+			var midValue = array[mid];
+			if(fn(midValue) < fn(value)){
+				low = mid + 1;
+			} else {
+				high = mid;
+			}
+		}
+		return high;
+	},
+	/**
+	 * 
+	 * @param {Array} array 
+	 * @param {Number} value 
+	 * @returns {Number} 下标
+	 * 同 sortedIndex ，不过是从高位开始检索
+	 */
+	sortedLastIndex: function(array, value){
+		var low = 0;
+		var high = array.length - 1;
+		while(low < high){
+			var mid = Math.floor((low + high) / 2);
+			var midValue = array[mid];
+			if(midValue <= value){
+				low = mid + 1;
+			} else {
+				high = mid;
+			}
+		}
+		return high;
+	},
+	/**
+	 * 
+	 * @param {Array} array 
+	 * @param {Number} value 
+	 * @param {*} f 
+	 * @returns {Number} 下标
+	 * 同 sortedIndexBy ，不过是从高位检索
+	 */
+	sortedLastIndexBy: function(array, value, f){
+		var fn, low = 0, high = array.length - 1;
+		if(typeof f == 'string'){
+			fn = function(obj){
+				return obj[f];
+			}
+		} else if (typeof f == 'function'){
+			fn = f;
+		}
+		while(low < high){
+			var mid = Math.floor((low + high) / 2);
+			var midValue = array[mid];
+			if(fn(midValue) <= fn(value)){
+				low = mid + 1;
+			} else {
+				high = mid;
+			}
+		}
+		return high;
 	}
 };

@@ -653,5 +653,139 @@ let util = {
 			}
 			i--;
 		}
+	},
+	/**
+	 * 
+	 * @param  {...any} arg 
+	 * 若干数组中的交集
+	 */
+	union: function(...arg){
+		return Array.from(new Set([].concat(this.flatten(arg))));
+	},
+	/**
+	 * 
+	 * @param  {...any} arg 
+	 * 若干数组中的元素经过迭代后取交集
+	 */
+	unionBy: function(...arg){
+		var fn, f= arg.pop();
+		if(typeof f == 'string'){
+			fn = function(obj){
+				return obj[f];
+			}
+		} else {
+			fn = f;
+		}
+		var concatArr = [].concat(this.flatten(arg));
+		var tmpArr = [], res = [];
+		concatArr.forEach(item => {
+			var computed = fn(item);
+			if(!tmpArr.includes(computed)){
+				tmpArr.push(computed);
+				res.push(item);
+			}
+		});
+		return res;
+	},
+	/**
+	 * 
+	 * @param {Array} array 
+	 * @param  {...any} values 
+	 * 去除array中与values相等的元素
+	 */
+	without: function(array,...values){
+		return array.filter(item => {
+			return values.indexOf(item) < 0;
+		});
+	},
+	/**
+	 * 
+	 * @param  {...any} arrays 
+	 * 并集 - 交集
+	 */
+	xor: function(...arrays){
+		return this.without([].concat(this.flatten(arrays)), ...this.intersection(...arrays));
+	},
+	/**
+	 * 
+	 * @param  {...any} arrays 
+	 * @returns {Array} res
+	 * 新数组的第一项由所有给定数组的第一项组成，以此类推
+	 */
+	zip: function(...arrays){
+		var start = arrays.shift();
+		var res = [];
+		for(var i = 0; i < start.length; i++){
+			var tmp = [];
+			tmp.push(start[i]);
+			for(var j = 0; j < arrays.length; j++){
+				tmp.push(arrays[j][i]);
+			}
+			res.push(tmp);
+		}
+		return res;
+	},
+	/**
+	 * 
+	 * @param {Array} props 
+	 * @param {Array} values 
+	 * @returns {Object}
+	 * 将两个数组的值分别生成对象的 key 和 value
+	 */
+	zipObject: function(props,values){
+		var object = {};
+		for(var i = 0; i < props.length; i++){
+			object[props[i]] = values[i];
+		}
+		return object;
+	},
+	/**
+	 * 
+	 * @param  {...any} args 
+	 * @returns {Array}
+	 * 同 zip，返回对新数组的每一项调用迭代函数后的结果
+	 */
+	zipWith: function(...args){
+		var fn = args.pop();
+		var start = args.shift();
+		var res = [];
+		for(var i = 0; i < start.length; i++){
+			var tmp = [];
+			tmp.push(start[i]);
+			for(var j = 0; j < args.length; j++){
+				tmp.push(args[j][i]);
+			}
+			res.push(fn(...tmp));
+		}
+		return res;
+	},
+	/**
+	 * 
+	 * @param {Array} array
+	 * 将数组分解 
+	 */
+	unzip: function(array){
+		var res = [], tmp = [];
+		for(var j = 0; j < array[0].length; j++){
+			tmp = [];
+			tmp.push(array[0][j]);
+			for(var i = 1; i < array.length; i++){
+				tmp.push(array[i][j]);
+			}
+			res.push(tmp);
+		}
+		return res;
+	},
+	/**
+	 * 
+	 * @param {Array} array 
+	 * @param {Function} fn
+	 * 先将数组分解，再将分解后的数组每一项调用迭代函数 
+	 */
+	unzipWith: function(array, fn){
+		var ret = this.unzip(array);
+		return ret.map(item => {
+			return fn(...item);
+		});
 	}
 };

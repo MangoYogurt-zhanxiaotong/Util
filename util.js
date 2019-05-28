@@ -527,5 +527,131 @@ let util = {
 			}
 		}
 		return high;
+	},
+	/**
+	 * 
+	 * @param {Array} array 
+	 * 对排序好的数组进行去重
+	 */
+	sortedUniq: function(array){
+		return Array.from(new Set(array.sort((a,b) => {return a - b;})));
+	},
+	/**
+	 * 
+	 * @param {Array} array 
+	 * @param {Function} fn 
+	 * array 的每一项经过迭代函数迭代后去重
+	 */
+	sortedUniqBy: function(array,fn){
+		var res = [];
+		var tmpArr = [];
+		var computed;
+		for(var i = 0; i < array.length; i++){
+			computed = fn(array[i]);
+			if(!tmpArr.includes(computed)){
+				res.push(array[i]);
+				tmpArr.push(computed);
+			}
+		}
+		return res;
+	},
+	/**
+	 * 
+	 * @param {Array} array 
+	 * 移除数组第一项
+	 */
+	tail: function(array){
+		return array.slice(1);
+	},
+	/**
+	 * 
+	 * @param {Array} array 
+	 * @param {Number} n
+	 * 选取数组前n项 
+	 */
+	take: function(array, n = 1){
+		return array.slice(0,n);
+	},
+	/**
+	 * 
+	 * @param {Array} array 
+	 * @param {Number} n 
+	 * 选取数组后n项
+	 */
+	takeRight: function(array, n = 1){
+		var start = array.length - n < 0 ? 0 : array.length - n;
+		return array.slice(start);
+	},
+	/**
+	 * 
+	 * @param {Array} array 
+	 * @param {*} predicate 
+	 * 从头开始选取元素，直到迭代函数判断为假
+	 */
+	takeWhile: function(array, predicate){
+		var fn;
+		if(typeof predicate == 'function'){
+			fn = predicate;
+		} else if (Array.isArray(predicate)){
+			fn = function(obj){
+				return obj[predicate[0]] == predicate[1];
+			}
+		} else if (typeof predicate == 'string'){
+			fn = function(obj){
+				return obj[predicate];
+			}
+		} else {
+			fn = function(obj){
+				for(var key in predicate){
+					if(predicate[key] !== obj[key]){
+						return false;
+					}
+				}
+				return true;
+			}
+		}
+		var i = 0;
+		while (i < array.length){
+			if(!fn(array[i])){
+				return array.slice(0,i);
+			}
+			i++;
+		}
+	},
+	/**
+	 * 
+	 * @param {Array} array 
+	 * @param {*} predicate 
+	 * 从尾开始选取元素，直到迭代函数判断为假
+	 */
+	takeRightWhile: function(array, predicate){
+		var fn;
+		if(typeof predicate == 'function'){
+			fn = predicate;
+		} else if (Array.isArray(predicate)){
+			fn = function(obj){
+				return obj[predicate[0]] == predicate[1];
+			}
+		} else if (typeof predicate == 'string'){
+			fn = function(obj){
+				return obj[predicate];
+			}
+		} else {
+			fn = function(obj){
+				for(var key in predicate){
+					if(predicate[key] !== obj[key]){
+						return false;
+					}
+				}
+				return true;
+			}
+		}
+		var i = array.length-1;
+		while (i > -1){
+			if(!fn(array[i])){
+				return array.slice(i + 1);
+			}
+			i--;
+		}
 	}
 };

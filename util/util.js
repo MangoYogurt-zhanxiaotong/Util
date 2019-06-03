@@ -787,5 +787,1222 @@ let util = {
 		return ret.map(item => {
 			return fn(...item);
 		});
+	},
+	/**
+	 * 
+	 * @param {Array|Object} collection 
+	 * @param {String|Object} iteratee
+	 * @returns {Object}
+	 *  返回一个对象，key为迭代器迭代后的值，value为匹配的数量
+	 */
+	countBy: function(collection, iteratee){
+		var obj = {}, fn;
+		if(typeof iteratee == 'string'){
+			fn = function(o){
+				return o[iteratee];
+			}
+		}else if (typeof iteratee == 'function'){
+			fn = iteratee;
+		}
+		if(Array.isArray(collection)){
+			for(var i of collection){
+				var value = fn(i);
+				if(obj[value]){
+					obj[value] = obj[value] + 1;
+				}else{
+					obj[value] = 1;
+				}
+			}
+		}else if (typeof collection == 'object'){
+			for(var i in collection){
+				var value = collection.hasOwnProperty(i) && fn(i);
+				if(obj[value]){
+					obj[value] = obj[value] + 1;
+				}else{
+					obj[value] = 1;
+				}
+			}
+		}
+		return obj;
+	},
+	/**
+	 * 
+	 * @param {Array|Object} collection 
+	 * @param {*} predicate
+	 * @returns {Boolean}
+	 * 若colleciton每一项返回true，则返回true，否则返回false 
+	 */
+	every: function(collection, predicate){
+		var fn;
+		if(typeof predicate == 'string'){
+			fn = function(obj){
+				return obj[predicate];
+			}
+		} else if (Array.isArray(predicate)){
+			fn = function(obj){
+				return obj[predicate[0]] == predicate[1];
+			}
+		} else if (typeof predicate == 'object'){
+			fn = function(obj){
+				for(var i in predicate){
+					if(predicate[i] !== obj[i]){
+						return false;
+					}
+				}
+				return true;
+			}
+		} else {
+			fn = predicate;
+		}
+		return collection.every(item => {
+			return fn(item);
+		});
+	},
+	filter: function(collection, predicate){
+		var fn;
+		if(typeof predicate == 'string'){
+			fn = function(obj){
+				return obj[predicate];
+			}
+		} else if (Array.isArray(predicate)){
+			fn = function(obj){
+				return obj[predicate[0]] == predicate[1];
+			}
+		} else if (typeof predicate == 'object'){
+			fn = function(obj){
+				for(var i in predicate){
+					if(predicate[i] !== obj[i]){
+						return false;
+					}
+				}
+				return true;
+			}
+		} else {
+			fn = predicate;
+		}
+		return collection.filter(item => {
+			return fn(item);
+		});
+	},
+	/**
+	 * 
+	 * @param {Array|Object} collection 
+	 * @param {*} iteratee 
+	 * @returns {Array}
+	 * 对collecitonm每一项调用迭代函数，返回由结果组成的新数组
+	 */
+	map: function(collection, iteratee){
+		var fn;
+		if(typeof iteratee == 'string'){
+			fn = function(obj){
+				return obj[iteratee];
+			}
+		}else if (typeof iteratee == 'function'){
+			fn = iteratee;
+		}
+		var res = [];
+		if(Array.isArray(collection)){
+			for(var i of collection){
+				res.push(fn(i));
+			}
+		}else if (typeof collection == 'object'){
+			for(var i in collection){
+				res.push(fn(collection[i]));
+			}
+		}
+		return res;
+	},
+	/**
+	 * 
+	 * @param {Array|Object} collection 
+	 * @param {*} predicate
+	 * @returns {Array} 
+	 * 对colleciton每一项调用迭代函数，若返回结果为true放进res[0]，若返回结果为false放进res[1]
+	 */
+	partition: function(collection, predicate){
+		var fn, res = [[], []];
+		if(typeof predicate == 'string'){
+			fn = function(obj){
+				return obj[predicate];
+			}
+		} else if (Array.isArray(predicate)){
+			fn = function(obj){
+				return obj[predicate[0]] == predicate[1];
+			}
+		} else if (typeof predicate == 'function'){
+			fn = predicate;
+		} else {
+			fn = function(obj){
+				for(var i in predicate){
+					if(predicate[i] != obj[i]){
+						return false;
+					}
+				}
+				return true;
+			}
+		}
+		collection.forEach(item => {
+			if(fn(item)){
+				res[0].push(item);
+			}else{
+				res[1].push(item);
+			}
+		});
+		return res;
+	},
+	/**
+	 * 
+	 * @param {*} collection 
+	 * 随机返回一个元素
+	 */
+	sample: function(collection, n=1){
+		var res = []
+		for(var i = 0; i < n; i++){
+			res.push(collection[Math.floor(Math.random()*collection.length)]); 
+			// lower + Math.floor(Math.random()*(higher-lower+1))
+		}
+		return res;
+	},
+	/**
+	 * 
+	 * @param {*} collection 
+	 * 打乱顺序
+	 */
+	shuffle: function(collection){
+		var size = collection.length;
+		for(var i = 0; i < size; i++){
+			var rand = Math.floor(Math.random()*size);
+			var tmp = collection[rand];
+			collection[rand] = collection[i];
+			collection[i] = tmp;
+		}
+		return collection;
+	},
+	/**
+	 * 
+	 * @param {Number} n 
+	 * @param {Function} func 
+	 * @returns {Function}
+	 * 当返回函数被调用n次之后，func才会被调用
+	 */
+	after: function(n, func){
+		n = parseInt(n);
+		return function(){
+			if(--n < 1){
+				func.apply(this, arguments);
+			}
+		}
+	},
+	/**
+	 * 
+	 * @param {Number} n 
+	 * @param {Function} func
+	 * @returns {Function} 
+	 * 返回函数调用次数<n之前，都会调用func
+	 */
+	before: function(n, func){
+		var result;
+		n = parseInt(n);
+		return function(){
+			if(--n > 0){
+				result = func.apply(this, arguments);
+			}
+			if (n <= 1){
+				func = undefined;
+			}
+			return result;
+		}
+	},
+	/**
+	 * @param {Function} fn
+	 * @param {*} args
+	 * 柯里化：将多参的函数变换成一个接受单一参数（第一个）的函数，并且返回接受余下的参数而且返回结果的新函数
+	 * var abc = function(a, b, c) {
+	 *    return [a, b, c];
+	 * };
+	 *	var curried = _.curry(abc);
+	 *	curried(1)(2)(3); // => [1, 2, 3]
+	 */
+	curry: function(fn, args){
+		var args = args || [];
+		var len = fn.length;
+		var _this = this;
+		return function(){
+			var _arg = Array.from(arguments);
+			Array.prototype.push.apply(args, _arg);
+			if(args.length < len){
+				return _this.curry(fn, args);
+			}
+			return fn.apply(this, args);
+		}
+	},
+	/**
+	 * 
+	 * @param {Function} fn 
+	 * @param {*} args 
+	 * 同 curry，参数倒序输入
+	 * curried(1)(2)(3); // => [3, 2, 1]
+	 */
+	curryRight: function(fn, args){
+		var args = args || [];
+		var len = fn.length;
+		var _this = this;
+		return function(){
+			var _arg = Array.from(arguments);
+			Array.prototype.unshift.apply(args, _arg);
+			if(args.length < len){
+				return _this.curryRight(fn, args);
+			}
+			return fn.apply(this, args);
+		}
+	},
+	/**
+	 * 
+	 * @param {Function} func 
+	 * @param  {...any} args 
+	 * 偏函数，会先固定几个参数，再一次性接收剩下的参数
+	 * 柯里化：根据传入参数不停地返回函数，直到参数个数满足柯里化前函数的参数个数
+	 */
+	partial: function(func, ...args) {
+		let palceholderNum = 0;
+		return (...args2) => {
+			args2.forEach(arg => {
+				let index = args.indexOf("_");
+				if(index < 0) return;
+				args[index] = arg;
+				palceholderNum++;
+			});
+			if(palceholderNum < args2.length) {
+				args2 = args2.slice(palceholderNum, args2.length);
+			}
+			return func.apply(this, [...args,...args2]);
+		}
+	},
+	/**
+	 * 
+	 * @param {Function} fn 
+	 * @param {Number} wait
+	 * 节流，在指定时间内，fn只执行一次，目的是降低函数执行频率
+	 * var fn = util.throttle(function(){console.log('scroll')},1000); 
+	 * window.onscroll = fn
+	 */
+	throttle: function(fn, wait){
+		var lastTime = 0;
+		return function(...arg){
+			var currentTime = Date.now();
+			if(currentTime - lastTime > wait){
+				fn(...arg);
+				lastTime = currentTime;
+			}
+		}
+	},
+	/**
+	 * 
+	 * @param {Function} fn 
+	 * @param {Number} wait 
+	 * 防抖，如果一个函数持续触发，那么在他最后一次调用经过指定时间后执行一次
+	 * var fn = util.debounce(function(){console.log('scroll')},1000); 
+	 * window.onscroll = fn
+	 */
+	debounce: function(fn, wait){
+		var timer = null;
+		return function(){
+			if(timer){
+				clearTimeout(timer);
+			}
+			timer = setTimeout(fn, wait);
+		}
+	},
+	/**
+	 * 
+	 * @param {Function} func 
+	 * @param {Array} transforms 
+	 * @returns {Function}
+	 * 返回一个新函数，对每一个参数按序调用 transforms 进行转换，最后调用func并返回结果
+	 */
+	overArgs: function(func, transforms){
+		if(!Array.isArray(transforms)){
+			return false;
+		}
+		return function(...arg){
+			for(var i = 0; i < arg.length; i++){
+				arg[i] = transforms[i].call(this, arg[i]);
+			}
+			return func.apply(this, arg);
+		}
+	},
+	/**
+	 * 
+	 * @param {Function} func 
+	 * @param {Array} indexes 索引
+	 * var rearged = _.rearg(function(a, b, c) {
+	 *	 return [a, b, c];
+	 * }, [2, 0, 1]);
+	 *	
+	 *	rearged('b', 'c', 'a');
+	 * 将参数按照给定的索引顺序排列，最后调用func返回结果
+	 */
+	rearg: function(func, indexes){
+		return function(...arg){
+			var argArr = [];
+			for(var i = 0; i < indexes.length; i++){
+				argArr[i] = arg[indexes[i]];
+			}
+			return func.apply(this, argArr);
+		}
+	},
+	/**
+	 * 如果不是数组，封装成一个数组，如果是，原样返回
+	 */
+	castArray: function(){
+		if(!arguments.length){
+			return [];
+		}
+		var value = arguments[0];
+		return Array.isArray(value) ? value : [value];
+	},
+	/**
+	 * 
+	 * @param {*} value 
+	 * @param {*} other 
+	 * 判断是否相等
+	 * NaN === NaN false
+	 * NaN !== NaN true
+	 */
+	eq: function(value, other){
+		return value === other || (value !== value && other !== other);
+	},
+	/**
+	 * 
+	 * @param {*} arg
+	 * 判断参数是不是数组 
+	 */
+	isArray: function(arg){
+		if(Array.isArray(arg)){
+			return true;
+		} else {
+			return false;
+		}
+	},
+	/**
+	 * 
+	 * @param {*} arg
+	 * 判断参数是不是布尔类型 
+	 */
+	isBoolean: function(arg){
+		if(typeof arg == 'boolean'){
+			return true;
+		} else {
+			return false;
+		}
+	},
+	/**
+	 * 
+	 * @param {*} arg
+	 * 判断参数是不是日期类型 
+	 */
+	isDate: function(arg){
+		if(arg instanceof Date){
+			return true;
+		} else {
+			return false;
+		}
+	},
+	/**
+	 * 
+	 * @param {*} arg
+	 * 判断参数是不是DOM节点 
+	 */
+	isElement: function(arg){
+		if (arg.nodeType != undefined && arg.nodeType == 1) {
+			return true
+		} else {
+			return false
+		}
+	},
+	/**
+	 * 
+	 * @param {*} arg
+	 * 判断参数是不是数值
+	 */
+	isNumber: function(arg){
+		if(typeof arg == 'number'){
+			return true;
+		} else {
+			return false;
+		}
+	},
+	/**
+	 * 
+	 * @param {*} value 
+	 * 判断参数是不是有限值
+	 */
+	isFinite: function(value) {
+		return typeof value == 'number' && isFinite(value);
+	},
+	/**
+	 * 比较两个对象中的属性值是否相等
+	 * @param  {Object}  obj   
+	 * @param  {Object}      
+	 */
+	isMatch: function(obj, source) {
+		for (var key in source) {
+			if (obj[key] != source[key]) {
+				return false
+			}
+		}
+		return true
+	},
+	/**
+	 * 
+	 * @param {Object} object 
+	 * @param {Array} paths 
+	 * 根据路径找出元素
+	 * var object = { 'a': [{ 'b': { 'c': 3 } }, 4] };
+	 *	_.at(object, ['a[0].b.c', 'a[1]']);
+	 *	// => [3, 4]
+	 */
+	at: function(object, paths){
+		var res = [];
+		for(var i = 0; i < paths.length; i++){
+			var path = paths[i].split('');
+			var arr = [];
+			for(var j = 0; j < path.length; j++){
+				if(
+					path[j] != '[' && 
+					path[j] != ']' &&
+					path[j] != '.'
+				){
+					arr.push(path[j]);
+				}
+			}
+			var target = object;
+			for(var k = 0; k < arr.length; k++){
+				target = target[arr[k]];
+			}
+			res.push(target);
+		}
+		return res;
+	},
+	/**
+	 * 
+	 * @param {Object} object 
+	 * @param  {...any} sources 
+	 * 按照从左到右的顺序将source中的属性赋给目标对象，若属性存在则跳过
+	 */
+	defaults: function(object, ...sources){
+		for(var i = 0; i < sources.length; i++){
+			for(var key in sources[i]){
+				if(!object[key]){
+					object[key] = sources[i][key];
+				}
+			}
+		}
+		return object;
+	},
+	/**
+	 * 
+	 * @param {Object} object 
+	 * @param {*} predicate 
+	 * 筛选出符合条件的第一个元素的键
+	 */
+	findKey: function(object, predicate){
+		var keyArr = [], fn;
+		if(typeof predicate == 'string'){
+			fn = function(obj){
+				return obj[predicate];
+			}
+		} else if (typeof predicate == 'function'){
+			fn = predicate;
+		} else if (Array.isArray(predicate)){
+			fn = function(obj){
+				return obj[predicate[0]] == predicate[1];
+			}
+		} else {
+			fn = function(obj){
+				for(var key in predicate){
+					if(obj[key] !== predicate[key]){
+						return false;
+					}
+				}
+				return true;
+			}
+		}
+		for(var key in object){
+			if(fn(object[key])){
+				keyArr.push(key);
+				break;
+			}
+		}
+		return keyArr;
+	},
+	/**
+	 * 
+	 * @param {Object} object 
+	 * @param {Function} iteratee
+	 * 为object的每个属性调用 iteratee，若iteratee调用后返回flase，迭代过程可提前结束
+	 */
+	forIn: function(object, iteratee){
+		for(var key in object){
+			// if(object.hasOwnProperty(key))
+			if(iteratee(object[key], key, object) === false){
+				break;
+			}
+		}
+	},
+	/**
+	 * 
+	 * @param {Object} object 
+	 * @param {Function} iteratee
+	 *  遍历 object 自己的属性，并为每一个属性调用迭代函数
+	 */
+	forOwn: function(object, iteratee){
+		for(var key in object){
+			if(object.hasOwnProperty(key)){
+				iteratee(object[key], key, object);
+			}
+		}
+	},
+	/**
+	 * 
+	 * @param {Object} object
+	 * 返回object上的所有非原型里面的属性 
+	 */
+	functions: function(object){
+		var res = [];
+		for(var key in object){
+			if(object.hasOwnProperty(key)){
+				res.push(key);
+			}
+		}
+		return res;
+	},
+	/**
+	 * 
+	 * @param {Object} object
+	 * 将对象的键和值翻转，若存在则覆盖 
+	 */
+	invert: function(object){
+		var res = {};
+		for(var key in object){
+			res[object[key]] = key;
+		}
+		return res;
+	},
+	/**
+	 * 
+	 * @param {Object} object 
+	 * @param {String} paths 
+	 * @param  {...any} args 
+	 * 在给定的对象路径上调用方法
+	 */
+	invoke: function(object, paths, ...args){
+		var func = paths.slice(paths.lastIndexOf('.')+1);
+		var path = paths.slice(0, paths.lastIndexOf('.')).split('');
+		var arr = [];
+		for(var j = 0; j < path.length; j++){
+			if(
+				path[j] != '[' && 
+				path[j] != ']' &&
+				path[j] != '.'
+			){
+				arr.push(path[j]);
+			}
+		}
+		var target = object;
+		for(var k = 0; k < arr.length; k++){
+			target = target[arr[k]];
+		}
+		return target[func](...args);
+
+	},
+	/**
+	 * @param  {Object} obj
+	 */
+	keys: function(obj) {
+		var arr = []
+		for (var key in obj) {
+			if(obj.hasOwnProperty(key)){
+				arr.push(key);
+			}
+		}
+		return arr
+	},
+	/**
+	 * 
+	 * @param {Object} object 
+	 * @param {Function} iteratee
+	 * 返回一个新对象，其键是调用 iteratee 产生的结果，值是object中的值
+	 */
+	mapKeys: function(object, iteratee){
+		var obj = {};
+		for(var key in object){
+			obj[iteratee(object[key], key, object)] = object[key];
+		}
+		return obj;
+	},
+	/**
+	 * @param  {Object} obj
+	 */
+	values: function(obj){
+		var arr = []
+		for (var key in obj) {
+			if(obj.hasOwnProperty(key)){
+				arr.push(obj[key]);
+			}
+		}
+		return arr
+	},
+	/**
+	 * 
+	 * @param {Object} object 
+	 * @param {Function} iteratee
+	 * 返回一个新对象，值是调用 iteratee 产生的结果，键是object中的键
+	 */
+	mapValues: function(object, iteratee){
+		var obj = {};
+		for(var key in object){
+			obj[key] = iteratee(object[key], key, object);
+		}
+		return obj;
+	},
+	/**
+	 * 
+	 * @param {Object} object 
+	 * @param {Array} paths 要省略的属性
+	 * 
+	 */
+	omit: function(object, paths){
+		var obj = {};
+		for(var key in object){
+			if(paths.indexOf(key) == -1){
+				obj[key] = object[key];
+			}
+		}
+		return obj;
+	},
+	/**
+	 * 
+	 * @param {Object} object 
+	 * @param {Array} paths
+	 * omit 的对立面 
+	 */
+	pick: function(object, paths){
+		var obj = {};
+		for(var key in object){
+			if(paths.indexOf(key) > -1){
+				obj[key] = object[key];
+			}
+		}
+		return obj;
+	},
+	/**
+	 * 
+	 * @param {Object} object 
+	 * 返回对象的键值对
+	 */
+	toPairs: function(object){
+		var res = [];
+		for(var key in object){
+			if(object.hasOwnProperty(key)){
+				var a = [];
+				a.push(key, object[key]);
+				res.push(a);
+			}
+		}
+		return res;
+	},
+	parseJson: function(){
+
+	},
+	/**
+	 * 比较两个对象时否相等
+	 * @param {Object} a 
+	 * @param {Object} b
+	 */
+	isEqual: function(a, b) {
+		if (typeof a != typeof b) {
+			return false
+		}
+		if (a != a && b != b) {
+			return true
+		}
+		if (a === b) {
+			return true
+		}
+		if (a !== b && typeof a === 'number' && typeof b === 'number') {
+			return false
+		}
+		var arr = []
+		for (var key in a) {
+			arr.push(key)
+		}
+		for (var key in b) {
+			if (arr.indexOf(key) < 0) {
+				arr.push(key)
+			}
+		}
+		for (key of arr) {
+			if (!WuFang.isEqual(a[key], b[key])) {
+				return false
+			}
+		}
+		return true
+	},
+	/**
+	 * 
+	 * @param {*} char 
+	 * 检验一个字符是不是字母
+	 * 
+	 */
+	letter: function(char) {
+		if(char === undefined){
+			return false;
+		}
+		if((char.charCodeAt(0) >= 65 && char.charCodeAt(0)<= 90) || (char.charCodeAt(0) >= 97 && char.charCodeAt(0)<= 122)){
+			return true;
+		}
+		return false;
+	},
+	/**
+	 * 
+	 * @param {String} string
+	 * 将字符串转换为驼峰式 
+	 */
+	camelCase: function(string = ''){
+		if(string == ''){
+			return '';
+		}
+		var str  = '';
+		for(var i = 0; i < string.length; i++){
+			if(this.letter(string[i])){
+				if(str.length == 0 || this.letter(string[i-1])){
+					str += string[i].toLowerCase();
+				} else {
+					str += string[i].toUpperCase();
+				}
+			}
+		}
+		return str;
+	},
+	/**
+	 * 
+	 * @param {String} string
+	 * 首字母大写 
+	 */
+	capitalize: function(string){
+		return string.slice(0,1).toUpperCase() + string.slice(1).toLowerCase();
+	},
+	/**
+	 * 
+	 * @param {String} string 
+	 * @param {String} target 
+	 * @param {Number} position 
+	 * 检查string是否以指定字符串结尾
+	 */
+	endsWith: function(string, target, position = string.length){
+		var length = string.length;
+		return string.slice(position - target.length, position) == target;
+	},
+	/**
+	 * 
+	 * @param {String} string
+	 * 将 "&", "<", ">", '"', and "'" 转义 
+	 */
+	escape: function(string){
+		var str = '';
+		for(var i = 0; i < string.length; i++){
+			str += checkCharacter(string[i]);
+		}
+		function checkCharacter(char){
+			switch (char) {
+				case "&":
+				  return "&amp;"
+				case ">":
+				  return "&gt;"
+				case "<":
+				  return "&lt;"
+				case "'":
+				  return "&apos;"
+				case '"':
+				  return "&quot;"
+			  }
+			  return char;
+		}
+		return str;
+	},
+	/**
+	 * 
+	 * @param {String} string
+	 * 同 escape，"^", "$", "", ".", "*", "+", "?", "(", ")", "[", "]", "{", "}", and "|"  
+	 */
+	escapeRegExp: function(string){
+		var str = '';
+		for(var i = 0; i < string.length; i++){
+			var res = checkCharacter(string[i]);
+			if(res == '\\'){
+				str += '\\';
+			}
+			str += string[i];
+		}
+		function checkCharacter(char){
+			switch(char){
+				case "^":
+				case "$":
+				case "": 
+				case ".":
+				case "*":
+				case "+":
+				case "?":
+				case "(":
+				case ")":
+				case "[":
+				case "]":
+				case "{":
+				case "}":
+				case "|":
+				 return "\\";
+			}
+			return char;
+		}
+		return str;
+	},
+	/**
+	 * 
+	 * @param {String} char
+	 * 检验是不是大写字母 
+	 */
+	isUpperCase: function(char) {
+		if (char.charCodeAt() >= 65 && char.charCodeAt() <= 90) {
+			return true
+		}
+		return false
+	},
+	/**
+	 * 
+	 * @param {String} string
+	 * 单词间用“-”链接 
+	 */
+	kebabCase: function(string){
+		if(string == ''){
+			return '';
+		}
+		var str  = '';
+		for(var i = 0; i < string.length; i++){
+			if(this.letter(string[i])){
+				if(
+					!this.letter(string[i-1]) || 
+					this.isUpperCase(string[i]) && !this.isUpperCase(string[i-1]) && !this.isUpperCase(string[i+1])
+				){
+					str += '-'+string[i].toLowerCase();
+				} else {
+					str += string[i].toLowerCase();
+				}
+			}
+		}
+		return str.slice(1);
+	},
+	/**
+	 * 
+	 * @param {String} string 
+	 * @param {Number} length 
+	 * @param {String} chars 
+	 * 填充字符串
+	 */
+	pad: function(string, length, chars = ' '){
+		var str = '';
+		if(length == string.length){
+			return string;
+		}
+		var mid = Math.floor((length - string.length) / 2);
+		for(var i = 0; i < mid; i++){
+			str += chars[i % chars.length];
+		} 
+		str += string;
+		for(var i = 0; i < length - string.length - mid; i++){
+			str += chars[i % chars.length];
+		} 
+		return str;
+	},
+	/**
+	 * 
+	 * @param {String} string 
+	 * @param {Number} length 
+	 * @param {String} chars
+	 * 从右侧开始填充 
+	 */
+	padEnd: function(string, length, chars = ' '){
+		var str = '';
+		if(length == string.length){
+			return string;
+		}
+		str += string;
+		for(var i = 0; i < length - string.length; i++){
+			str += chars[i % chars.length];
+		} 
+		return str;
+	},
+	/**
+	 * 
+	 * @param {String} string 
+	 * @param {Number} length 
+	 * @param {String} chars
+	 * 从左侧开始填充 
+	 */
+	padStart: function(string, length, chars = ' '){
+		var str = '';
+		if(length == string.length){
+			return string;
+		}
+		for(var i = 0; i < length - string.length; i++){
+			str += chars[i % chars.length];
+		} 
+		str += string;
+		return str;
+	},
+	/**
+	 * 
+	 * @param {String} string 
+	 * @param {Number} n 
+	 * 将字符串 string 重复 n 次
+	 */
+	repeat: function(string, n = 1){
+		var str = ""
+		for (var i = 0; i < n; i++) {
+			str += string
+		}
+		return str;
+	},
+	/**
+	 * 
+	 * @param {String} string 
+	 * @param {String} pattern 
+	 * @param {String} replacement 
+	 * 将原字符串中的 pattern 替换为 replacement
+	 */
+	replace: function(string, pattern, replacement){
+		return string.replace(pattern, replacement);
+	},
+	/**
+	 * 
+	 * @param {String} string 
+	 * @param {String} separator 
+	 * @param {Number} limit 
+	 * 以给定字符串分隔 string，并返回给定数量的结果
+	 */
+	split: function(string, separator, limit){
+		return string.split(separator).slice(0, limit);
+	},
+	/**
+	 * 
+	 * @param {String} string 
+	 * @param {String} target 
+	 * @param {Number} position 
+	 * 检查string是否以指定字符串开始
+	 */
+	startsWith: function(string, target, position = 0){
+		var length = string.length;
+		return string.slice(position, position + target.length) == target;
+	},
+	/**
+	 * 
+	 * @param {Object} object 
+	 * @param {Array} methodNames
+	 * 批量将方法的this绑定到object，覆盖原有的方法
+	 */
+	bindAll: function(object, methodNames){
+		methodNames.forEach(item => {
+			console.log(item);
+			if(item != '_proto_'){
+				var func = object[item].bind(object);
+				object[item] = func;
+			}
+		});
+	},
+	/**
+	 * 
+	 * @param {Object} source
+	 * 判断 source 中的属性是否和 object 中的属性对应，全部对应返回true，否则返回 false
+	 */
+	conforms: function(source){
+		return function(arg){
+			for(var key in source){
+				if(!source[key](arg[key])){
+					return false;
+				}
+			}
+			return true;
+		}
+	},
+	/**
+	 * 
+	 * @param {*} value 
+	 * 返回 value 的函数
+	 */
+	constant: function(value) {
+		return function() {
+		  return value;
+		};
+	},
+	/**
+	 * 
+	 * @param {*} value 
+	 * @param {*} defaultValue 
+	 * 当 value 是 `NaN`, `null`,`undefined`的时候返回 defaultValue，否则返回 value
+	 * 
+	 */
+	defaultTo: function(value, defaultValue) {
+		return (value == null || value !== value) ? defaultValue : value;
+	},
+	/**
+	 * 
+	 * @param {Array} funcs
+	 * 返回依次调用给定的函数后的结果
+	 */
+	flow: function(funcs){
+		return function(...args){
+			var result = funcs.length ? funcs[0].apply(this, args) : value;
+			for(var i = 1; i < funcs.length; i++){
+				result = funcs[i].call(this, result);
+			}
+			return result;
+		}
+	},
+	/**
+	 * 
+	 * @param {*} value
+	 * 返回第一个参数 
+	 */
+	identity: function(value) {
+		return value;
+	},
+	iteratee: function(func){
+		return function(arg){
+			var fn;
+			if(typeof func == 'string'){
+				return arg[func];
+			} else if (Array.isArray(func)){
+				return arg[func[0]] == func[1];
+			} else {
+				for(var key in func){
+					if(func[key] != arg[key]){
+						return false;
+					}
+				}
+				return true;
+			}
+		}
+	},
+	/**
+	 * 
+	 * @param {Object} source
+	 * 比较给定对象是否与 source 中的属性相同 
+	 */
+	matches: function(source){
+		var self = this;
+		return function(obj){
+			for(var key in source){
+				if(!self.isEqual(source[key], obj[key])){
+					return false;
+				}
+			}
+			return true;
+		}
+	},
+	/**
+	 * 
+	 * @param {*} path 
+	 * @param {*} srcValue 
+	 * 比较 obj 中 path 对应的值是否等于 srcValue
+	 */
+	matchesProperty: function(path, srcValue){
+		var self = this;
+		return function(obj){
+			if(!self.isEqual(obj[path], srcValue)){
+				return false;
+			}
+			return true;
+		}
+	},
+	/**
+	 * 
+	 * @param {Number} number 
+	 * 返回第几个参数
+	 */
+	nthArg: function(number = 0){
+		return function(...arg){
+			number += number < 0 ? arg.length : 0;
+			return arg[number]; 
+		}
+	},
+	/**
+	 * 
+	 * @param {Array} iteratees 
+	 * 将参数应用于 iteratees 的每一项，返回结果组成的数组
+	 */
+	over: function(iteratees){
+		return function(...arg){
+			var res = [];
+			iteratees.forEach(item => {
+				res.push(item(...arg));
+			});
+			return res;
+		}
+	},
+	/**
+	 * 
+	 * @param {Array} iteratees 
+	 * 同 over，只有所有的都返回true，才返回 true
+	 */
+	overEvery: function(iteratees){
+		return function(...arg){
+			return iteratees.every(item => {
+				return item(...arg);
+			});
+		}
+	},
+	/**
+	 * 
+	 * @param {*} iteratees 
+	 * 同 over，部分返回 true 即返回 true
+	 */
+	overSome: function(iteratees){
+		return function(...arg){
+			return iteratees.some(item => {
+				return item(...arg);
+			});
+		}
+	},
+	/**
+	 * 
+	 * @param {Number} start 
+	 * @param {Number} end 
+	 * @param {Number} step
+	 * 创建一个从 start 到 end，跨度为 step 的数字数组 
+	 */
+	range: function(start, end, step){
+		if (end === undefined) {
+			end = start;
+			start = 0;
+		}
+		step = step === undefined ? (start < end ? 1 : -1) : step;
+		var index = -1,
+          length = (end - start) / (step || 1),
+          result  = [];
+
+		while (length--) {
+			result[++index] = start;
+			start += step;
+		}
+		return result;
+	},
+	/**
+	 * 生成一个唯一ID，若有前缀，ID添加在前缀后面
+	 */
+	idCounter: 0,
+	uniqueId: function(prefix) {
+		var id = ++this.idCounter;
+		return prefix ? prefix.toString() + id : id;
 	}
-};
+
+}

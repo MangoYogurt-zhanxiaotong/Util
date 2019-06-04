@@ -234,6 +234,34 @@ class BinarySearchTree {
         }
         return this.hasPathSum(root.left, sum - root.key) || this.hasPathSum(root.right, sum - root.key);
     }
+    // 广度优先遍历
+    BFSearch(node, callback) {
+        let arr = [];
+        while(node !=null){
+            callback(node.key);
+            if(node.left) {
+                arr.push(node.left);
+            }
+            if(node.right) {
+                arr.push(node.right);
+            }
+            node = arr.shift();
+        }
+    }
+    // 深度优先遍历
+    DFSearch(node, callback) {
+        let arr = [];
+        while(node !=null){
+            callback(node.key);
+            if(node.right) {
+                arr.push(node.right);
+            }
+            if(node.left) {
+                arr.push(node.left);
+            }
+            node = arr.pop();
+        }
+    }
 }
 class Node {
     constructor(key) {
@@ -330,8 +358,18 @@ t.insert(3);
 t.insert(20);
 t.insert(15);
 t.insert(22);
-console.log(t.isBalance()); // true
+// console.log(t.isBalance()); // true
 
-// test haspathsum
-console.log(t.hasPathSum(t.root, 12)); // true
-console.log(t.hasPathSum(t.root, 53)); // false
+// // test haspathsum
+// console.log(t.hasPathSum(t.root, 12)); // true
+// console.log(t.hasPathSum(t.root, 53)); // false
+
+t.insert(1);
+t.insert(5);
+t.insert(13);
+// BFS
+// 9 3 20 1 5 15 22 13
+// t.BFSearch(t.root, function(value){console.log(value)});
+// DFS
+// 9 3 1 5 20 15 13 22
+t.DFSearch(t.root, function(value){console.log(value)});

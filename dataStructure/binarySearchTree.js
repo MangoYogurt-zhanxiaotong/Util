@@ -234,7 +234,7 @@ class BinarySearchTree {
         }
         return this.hasPathSum(root.left, sum - root.key) || this.hasPathSum(root.right, sum - root.key);
     }
-    // 广度优先遍历
+    // 广度优先搜索
     BFSearch(node, callback) {
         let arr = [];
         while(node !=null){
@@ -248,7 +248,7 @@ class BinarySearchTree {
             node = arr.shift();
         }
     }
-    // 深度优先遍历
+    // 深度优先搜索
     DFSearch(node, callback) {
         let arr = [];
         while(node !=null){

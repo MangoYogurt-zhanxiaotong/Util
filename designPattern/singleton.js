@@ -1,5 +1,12 @@
 /**
- * 单例模式：多次调用构造函数，返回同一个实例
+ * 单例模式
+ * 
+ * 定义：确保全局只有一个实例
+ * 
+ * 优点：减少内存开销
+ * 
+ * 缺点：与单一职责冲突
+ * 
  */
 let mySingleTon = (function(){
     let instance;
@@ -15,6 +22,7 @@ let mySingleTon = (function(){
         }
     }
 })();
+// es6 class static
 
 let instance1 = mySingleTon.getInstance();
 let instance2 = mySingleTon.getInstance();
